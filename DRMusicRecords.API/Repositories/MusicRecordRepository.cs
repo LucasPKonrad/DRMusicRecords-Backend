@@ -36,5 +36,27 @@ namespace DRMusicRecords.API.Repositories
         {
             return _records;
         }
+        public List<MusicRecord> SearchRecords(string ? title, string ? artist)
+        {
+            IEnumerable<MusicRecord> result = GetAllRecords(); // IEnumerable is an interface that represents a collection of objects that can be enumerated (iterated) one at a time.
+
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                result = result.Where(record =>
+                    record.Title.Contains(
+                        title,
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(artist))
+            {
+                result = result.Where(record =>
+                    record.Artist.Contains(
+                        artist,
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
+            return result.ToList();
+        }
     }
 }
