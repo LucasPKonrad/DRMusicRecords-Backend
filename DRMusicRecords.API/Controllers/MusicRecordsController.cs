@@ -1,11 +1,13 @@
 ﻿using DRMusicRecords.API.Models;
-using Microsoft.AspNetCore.Mvc;
 using DRMusicRecords.API.Repositories;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DRMusicRecords.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableCors("AllowAll")]    
     public class MusicRecordsController : ControllerBase
     {
         private readonly MusicRecordRepository _repository;
