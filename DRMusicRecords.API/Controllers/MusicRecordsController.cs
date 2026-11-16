@@ -1,5 +1,6 @@
 ﻿using DRMusicRecords.API.Models;
 using DRMusicRecords.API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +23,68 @@ namespace DRMusicRecords.API.Controllers
         {
             var records = _repository.SearchRecords(title, artist);
             return Ok(records);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public ActionResult<MusicRecord> AddRecord(
+        [FromBody] CreateMusicRecordRequest request)
+        {
+            var record = new MusicRecord
+            {
+                Title = request.Title.Trim(),
+                Artist = request.Artist.Trim(),
+                Duration = request.Duration,
+                PublicationYear = request.PublicationYear
+            };
+
+            var createdRecord = _repository.AddRecord(record);
+
+            return StatusCode(201, createdRecord);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id:int}")]
+        public IActionResult DeleteRecord(int id)
+        {
+            bool deleted = _repository.DeleteRecord(id);
+
+            if (!deleted)
+            {
+                return NotFound($"Record with ID {id} was not found.");
+            }
+
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id:int}")]
+        public IActionResult UpdateRecord(
+        int id,
+        [FromBody] CreateMusicRecordRequest request)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid record ID.");
+            }
+
+            var record = new MusicRecord
+            {
+                Id = id,
+                Title = request.Title.Trim(),
+                Artist = request.Artist.Trim(),
+                Duration = request.Duration,
+                PublicationYear = request.PublicationYear
+            };
+
+            bool updated = _repository.UpdateRecord(record);
+
+            if (!updated)
+            {
+                return NotFound($"Record with ID {id} was not found.");
+            }
+
+            return NoContent();
         }
     }
 }
