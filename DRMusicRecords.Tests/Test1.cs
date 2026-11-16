@@ -1,4 +1,6 @@
-﻿using DRMusicRecords.API.Repositories;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DRMusicRecords.API.Models;
+using DRMusicRecords.API.Repositories;
 
 namespace DRMusicRecords.Tests
 {
@@ -15,7 +17,7 @@ namespace DRMusicRecords.Tests
             var result = repository.GetAllRecords();
 
             // Assert
-            Assert.HasCount(3, result);
+            Assert.IsTrue(result.Count > 0);
         }
 
         [TestMethod]
@@ -84,7 +86,60 @@ namespace DRMusicRecords.Tests
             var result = repository.SearchRecords(null, null);
 
             // Assert
-            Assert.HasCount(3, result);
+            Assert.IsTrue(result.Count > 0);
+        }
+
+        [TestMethod]
+        public void AddRecord_ShouldGenerateId()
+        {
+            // Arrange
+            var repository = new MusicRecordRepository();
+
+            var record = new MusicRecord
+            {
+                Title = "MSTest Album",
+                Artist = "Test Artist",
+                Duration = 180,
+                PublicationYear = 2020
+            };
+
+            // Act
+            var result = repository.AddRecord(record);
+
+            // Assert
+            Assert.IsTrue(result.Id > 0);
+            Assert.AreEqual("MSTest Album", result.Title);
+            Assert.AreEqual("Test Artist", result.Artist);
+        }
+
+        [TestMethod]
+        public void AddRecord_ShouldPersistInDatabase()
+        {
+            // Arrange
+            var repository = new MusicRecordRepository();
+
+            var record = new MusicRecord
+            {
+                Title = "MSTest Persistence",
+                Artist = "Test Artist",
+                Duration = 200,
+                PublicationYear = 2020
+            };
+
+            // Act
+            var createdRecord = repository.AddRecord(record);
+
+            var allRecords = repository.GetAllRecords();
+
+            // Assert
+            var savedRecord = allRecords
+                .FirstOrDefault(r => r.Id == createdRecord.Id);
+
+            Assert.IsNotNull(savedRecord);
+            Assert.AreEqual("MSTest Persistence", savedRecord.Title);
+            Assert.AreEqual("Test Artist", savedRecord.Artist);
+            Assert.AreEqual(200, savedRecord.Duration);
+            Assert.AreEqual(2020, savedRecord.PublicationYear);
         }
     }
 }

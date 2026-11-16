@@ -57,5 +57,34 @@ namespace DRMusicRecords.API.Repositories
 
             return result.ToList();
         }
+
+        public MusicRecord AddRecord(MusicRecord record)
+        {
+            string sql = """
+                INSERT INTO Records
+            (Title, Artist, Duration, PublicationYear)
+            OUTPUT INSERTED.Id
+            VALUES
+            (@Title, @Artist, @Duration, @PublicationYear)
+            """;
+
+            using SqlConnection connection =
+                new SqlConnection(_connectionString);
+
+            using SqlCommand command =
+                new SqlCommand(sql, connection);
+
+            command.Parameters.AddWithValue("@Title", record.Title);
+            command.Parameters.AddWithValue("@Artist", record.Artist);
+            command.Parameters.AddWithValue("@Duration", record.Duration);
+            command.Parameters.AddWithValue(
+                "@PublicationYear", record.PublicationYear);
+
+            connection.Open();
+
+            record.Id = Convert.ToInt32(command.ExecuteScalar());
+
+            return record;
+        }
     }
 }
