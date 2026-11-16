@@ -86,5 +86,55 @@ namespace DRMusicRecords.API.Repositories
 
             return record;
         }
+
+        public bool DeleteRecord(int id)
+        {
+            string sql = "DELETE FROM Records WHERE Id = @Id";
+
+            using SqlConnection connection =
+                new SqlConnection(_connectionString);
+
+            using SqlCommand command =
+                new SqlCommand(sql, connection);
+
+            command.Parameters.AddWithValue("@Id", id);
+
+            connection.Open();
+
+            int rowsAffected = command.ExecuteNonQuery();
+
+            return rowsAffected > 0;
+        }
+
+        public bool UpdateRecord(MusicRecord record)
+        {
+            string sql = """
+            UPDATE Records
+            SET Title = @Title,
+            Artist = @Artist,
+            Duration = @Duration,
+            PublicationYear = @PublicationYear
+            WHERE Id = @Id
+            """;
+
+            using SqlConnection connection =
+                new SqlConnection(_connectionString);
+
+            using SqlCommand command =
+                new SqlCommand(sql, connection);
+
+            command.Parameters.AddWithValue("@Id", record.Id);
+            command.Parameters.AddWithValue("@Title", record.Title);
+            command.Parameters.AddWithValue("@Artist", record.Artist);
+            command.Parameters.AddWithValue("@Duration", record.Duration);
+            command.Parameters.AddWithValue(
+                "@PublicationYear", record.PublicationYear);
+
+            connection.Open();
+
+            int rowsAffected = command.ExecuteNonQuery();
+
+            return rowsAffected > 0;
+        }
     }
 }

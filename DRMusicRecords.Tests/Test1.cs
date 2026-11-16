@@ -141,5 +141,101 @@ namespace DRMusicRecords.Tests
             Assert.AreEqual(200, savedRecord.Duration);
             Assert.AreEqual(2020, savedRecord.PublicationYear);
         }
+
+        [TestMethod]
+        public void DeleteRecord_ShouldRemoveRecord()
+        {
+            // Arrange
+            var repository = new MusicRecordRepository();
+
+            var record = repository.AddRecord(new MusicRecord
+            {
+                Title = "Delete Test",
+                Artist = "MSTest",
+                Duration = 120,
+                PublicationYear = 2020
+            });
+
+            // Act
+            bool deleted = repository.DeleteRecord(record.Id);
+
+            // Assert
+            Assert.IsTrue(deleted);
+
+            var records = repository.GetAllRecords();
+
+            Assert.IsFalse(records.Any(r => r.Id == record.Id));
+        }
+
+        [TestMethod]
+        public void DeleteRecord_NonExistingId_ReturnsFalse()
+        {
+            var repository = new MusicRecordRepository();
+
+            bool result = repository.DeleteRecord(-1);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void UpdateRecord_ShouldChangeRecord()
+        {
+            // Arrange
+            var repository = new MusicRecordRepository();
+
+            var record = repository.AddRecord(new MusicRecord
+            {
+                Title = "Original Title",
+                Artist = "Test Artist",
+                Duration = 180,
+                PublicationYear = 2020
+            });
+
+            try
+            {
+                // Act
+                record.Title = "Updated Title";
+                record.Duration = 240;
+
+                bool updated = repository.UpdateRecord(record);
+
+                // Assert
+                Assert.IsTrue(updated);
+
+                var savedRecord = repository.GetAllRecords()
+                    .FirstOrDefault(r => r.Id == record.Id);
+
+                Assert.IsNotNull(savedRecord);
+                Assert.AreEqual("Updated Title", savedRecord.Title);
+                Assert.AreEqual(240, savedRecord.Duration);
+            }
+            finally
+            {
+                // Remove our test record
+                repository.DeleteRecord(record.Id);
+            }
+        }
+
+        [TestMethod]
+        public void UpdateRecord_NonExistingId_ReturnsFalse()
+        {
+            // Arrange
+            var repository = new MusicRecordRepository();
+
+            var record = new MusicRecord
+            {
+                Id = -1,
+                Title = "Test",
+                Artist = "Test Artist",
+                Duration = 180,
+                PublicationYear = 2020
+            };
+
+            // Act
+            bool updated = repository.UpdateRecord(record);
+
+            // Assert
+            Assert.IsFalse(updated);
+        }
     }
 }
